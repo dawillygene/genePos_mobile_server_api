@@ -20,6 +20,7 @@ class Product extends Model
         'category',
         'image_url',
         'is_active',
+        'shop_id',
     ];
 
     protected $casts = [
@@ -28,6 +29,14 @@ class Product extends Model
         'stock_quantity' => 'integer',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Get the shop that owns the product
+     */
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
+    }
 
     public function saleItems()
     {

@@ -12,10 +12,13 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'google_id',
         'name',
         'email',
-        'phone',
+        'email_verified_at',
+        'password',
+        'google_id',
+        'avatar',
+        'shop_id',
         'role',
         'is_active',
         'profile_image_url',
@@ -32,6 +35,38 @@ class User extends Authenticatable
         'last_login_at' => 'datetime',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Get the shop that the user belongs to
+     */
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
+    }
+
+    /**
+     * Get the shops owned by this user
+     */
+    public function ownedShops()
+    {
+        return $this->hasMany(Shop::class, 'owner_id');
+    }
+
+    /**
+     * Check if user is shop owner
+     */
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
+    /**
+     * Check if user is sales person
+     */
+    public function isSalesPerson(): bool
+    {
+        return $this->role === 'sales_person';
+    }
 
     public function sales()
     {

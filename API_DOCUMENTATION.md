@@ -1,12 +1,17 @@
 # GenePos API Documentation
 
 ## Overview
-The GenePos API is a RESTful web service built with Laravel that provides comprehensive Point of Sale functionality. All API responses are in JSON format.
+The GenePos API is a RESTful web service built with Laravel that provides comprehensive Point of Sale functionality with multi-tenant shop management. All API responses are in JSON format.
 
 ## Base URL
 ```
 http://localhost:8001/api
 ```
+
+## Multi-Tenant Architecture
+The API supports multi-tenant shop management with role-based access control:
+- **Owner**: Can create shops, manage team members, and access all shop data
+- **Sales Person**: Can manage products and sales within their assigned shop
 
 ## Authentication
 The API uses Laravel Sanctum for authentication. Most endpoints require a valid Bearer token.
@@ -319,6 +324,121 @@ curl -X POST http://localhost:8001/api/products \
     "sku": "TEST-001",
     "category": "Test"
   }'
+```
+
+## Shop Management Endpoints
+
+### List Shops
+```http
+GET /shops
+```
+**Response (200):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Tech Store",
+    "slug": "tech-store",
+    "description": "Electronics and gadgets store",
+    "address": "123 Tech Street, Silicon Valley",
+    "phone": "+1-555-0101",
+    "email": "tech@store.com",
+    "currency": "USD",
+    "timezone": "America/Los_Angeles",
+    "is_active": true,
+    "owner_id": 1,
+    "created_at": "2025-08-03T19:44:13.000000Z",
+    "updated_at": "2025-08-03T19:44:13.000000Z"
+  }
+]
+```
+
+### Create Shop (Owner only)
+```http
+POST /shops
+```
+**Request Body:**
+```json
+{
+  "name": "My Shop",
+  "description": "Description of my shop",
+  "address": "123 Main Street",
+  "phone": "+1-555-0123",
+  "email": "contact@myshop.com",
+  "currency": "USD",
+  "timezone": "America/New_York"
+}
+```
+
+### Get Shop Statistics
+```http
+GET /shops/{id}/statistics
+```
+**Response (200):**
+```json
+{
+  "total_products": 25,
+  "active_products": 23,
+  "low_stock_products": 3,
+  "total_sales": 150,
+  "total_revenue": 15750.50,
+  "total_team_members": 5,
+  "active_team_members": 4
+}
+```
+
+## Team Management Endpoints
+
+### List Team Members
+```http
+GET /team
+```
+**Response (200):**
+```json
+[
+  {
+    "id": 2,
+    "name": "Mike Johnson",
+    "email": "mike@techstore.com",
+    "role": "sales_person",
+    "is_active": true,
+    "created_at": "2025-08-03T19:44:13.000000Z",
+    "updated_at": "2025-08-03T19:44:13.000000Z"
+  }
+]
+```
+
+### Add Sales Person (Owner only)
+```http
+POST /team
+```
+**Request Body:**
+```json
+{
+  "name": "New Sales Person",
+  "email": "sales@myshop.com",
+  "password": "secure_password",
+  "role": "sales_person"
+}
+```
+
+### Toggle Team Member Status (Owner only)
+```http
+PATCH /team/{id}/toggle-status
+```
+**Response (200):**
+```json
+{
+  "message": "Team member activated successfully",
+  "user": {
+    "id": 2,
+    "name": "Mike Johnson",
+    "email": "mike@techstore.com",
+    "role": "sales_person",
+    "is_active": true,
+    "updated_at": "2025-08-03T19:44:13.000000Z"
+  }
+}
 ```
 
 ## Rate Limiting

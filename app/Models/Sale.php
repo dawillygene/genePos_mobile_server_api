@@ -22,6 +22,7 @@ class Sale extends Model
         'cashier_id',
         'cashier_name',
         'notes',
+        'shop_id',
     ];
 
     protected $casts = [
@@ -39,5 +40,13 @@ class Sale extends Model
     public function cashier()
     {
         return $this->belongsTo(User::class, 'cashier_id');
+    }
+
+    /**
+     * Get the shop that owns the sale
+     */
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
     }
 }

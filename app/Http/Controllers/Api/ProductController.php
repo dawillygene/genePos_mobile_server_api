@@ -5,17 +5,32 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::where('is_active', true)->get();
+        $user = Auth::user();
+        
+        if (!$user->shop_id) {
+            return response()->json(['message' => 'User is not associated with any shop'], 400);
+        }
+        
+        $products = Product::where('shop_id', $user->shop_id)
+            ->where('is_active', true)
+            ->get();
         return response()->json($products);
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        
+        if (!$user->shop_id) {
+            return response()->json(['message' => 'User is not associated with any shop'], 400);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -26,17 +41,34 @@ class ProductController extends Controller
             'sku' => 'string|unique:products,sku',
         ]);
 
-        $product = Product::create($request->all());
+        $productData = $request->all();
+        $productData['shop_id'] = $user->shop_id;
+
+        $product = Product::create($productData);
         return response()->json($product, 201);
     }
 
     public function show(Product $product)
     {
+        $user = Auth::user();
+        
+        // Check if user has access to this product's shop
+        if ($user->shop_id !== $product->shop_id) {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+        
         return response()->json($product);
     }
 
     public function update(Request $request, Product $product)
     {
+        $user = Auth::user();
+        
+        // Check if user has access to this product's shop
+        if ($user->shop_id !== $product->shop_id) {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+
         $request->validate([
             'name' => 'string|max:255',
             'price' => 'numeric|min:0',
@@ -53,6 +85,13 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        $user = Auth::user();
+        
+        // Check if user has access to this product's shop
+        if ($user->shop_id !== $product->shop_id) {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+        
         $product->update(['is_active' => false]);
         return response()->json(['message' => 'Product deactivated successfully']);
     }
