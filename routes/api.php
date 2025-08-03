@@ -9,7 +9,10 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\TeamController;
 
+// Authentication routes (no middleware required)
 Route::post('/auth/google', [AuthController::class, 'googleLogin']);
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
