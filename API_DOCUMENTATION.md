@@ -1,20 +1,52 @@
 # GenePos API Documentation
 
 ## Overview
-The GenePos API is a RESTful web service built with Laravel that provides comprehensive Point of Sale functionality with multi-tenant shop management. All API responses are in JSON format.
+The GenePos API is a comprehensive RESTful web service built with Laravel that provides complete Point of Sale functionality with multi-tenant shop management, role-based access control, and multiple authentication methods. All API responses are in JSON format.
 
-## Base URL
+## Interactive Documentation
+🚀 **Visit the interactive API documentation at:**
+- **Local Development**: http://localhost:8002/docs
+- **Production**: https://genepos.dawillygene.com/docs
+
+The interactive docs include:
+- Complete endpoint reference with examples
+- Authentication testing interface
+- Request/response schemas
+- Postman collection download
+- OpenAPI specification
+
+## Base URLs
 ```
-http://localhost:8001/api
+Local Development: http://localhost:8002/api
+Production: https://genepos.dawillygene.com/api
 ```
+
+## Key Features
+- ✅ **Multi-tenant Architecture**: Complete shop isolation with role-based access control
+- ✅ **Dual Authentication**: Google OAuth and traditional email/password login
+- ✅ **Shop Management**: Create and manage shops, team members, and settings
+- ✅ **Product Management**: CRUD operations for products with shop isolation
+- ✅ **Sales Management**: Process sales, manage transactions, and generate reports
+- ✅ **Team Management**: Add sales persons, manage permissions, and track activity
+- ✅ **API Documentation**: Auto-generated interactive documentation with Scribe
+- ✅ **Data Isolation**: Complete separation of data between shops
+- ✅ **Role-based Permissions**: Owner and sales person access levels
 
 ## Multi-Tenant Architecture
-The API supports multi-tenant shop management with role-based access control:
-- **Owner**: Can create shops, manage team members, and access all shop data
-- **Sales Person**: Can manage products and sales within their assigned shop
+The API supports complete multi-tenant shop management:
+- **Owner**: Can create shops, manage team members, access all shop data and statistics
+- **Sales Person**: Can manage products and sales within their assigned shop only
+- **Data Isolation**: Users only see data from their assigned shop
+- **Security**: Cross-shop data access is completely prevented
 
-## Authentication
-The API uses Laravel Sanctum for authentication. Most endpoints require a valid Bearer token.
+## Authentication Methods
+The API supports two authentication methods using Laravel Sanctum tokens:
+
+### 1. Google OAuth Authentication
+For seamless single sign-on integration
+
+### 2. Email/Password Authentication  
+For traditional registration and login workflows
 
 ### Headers
 ```
@@ -25,7 +57,70 @@ Authorization: Bearer {your-token}
 
 ## Authentication Endpoints
 
-### Google OAuth Login
+### 1. User Registration (Email/Password)
+```http
+POST /auth/register
+```
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "password_confirmation": "password123",
+  "role": "owner"
+}
+```
+
+**Response (201):**
+```json
+{
+  "message": "User registered successfully",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "owner",
+    "shop_id": null,
+    "is_active": true,
+    "created_at": "2025-08-03T19:44:13.000000Z"
+  },
+  "token": "1|laravel_sanctum_token"
+}
+```
+
+### 2. Email/Password Login
+```http
+POST /auth/login
+```
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "Login successful",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "owner",
+    "shop_id": 1,
+    "is_active": true,
+    "last_login_at": "2025-08-03T22:30:15.000000Z"
+  },
+  "token": "1|laravel_sanctum_token"
+}
+```
+
+### 3. Google OAuth Login
 ```http
 POST /auth/google
 ```
@@ -33,7 +128,7 @@ POST /auth/google
 **Request Body:**
 ```json
 {
-  "access_token": "google_access_token"
+  "id_token": "google_id_token_here"
 }
 ```
 
@@ -45,10 +140,32 @@ POST /auth/google
     "name": "John Doe",
     "email": "john@example.com",
     "google_id": "123456789",
+    "role": "owner",
     "created_at": "2025-08-03T19:44:13.000000Z"
   },
   "token": "1|laravel_sanctum_token"
 }
+```
+
+### 4. Get Current User
+```http
+GET /auth/user
+```
+*Requires authentication*
+
+**Response (200):**
+```json
+{
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "owner",
+    "shop_id": 1,
+    "is_active": true
+  }
+}
+```
 ```
 
 ### Logout
@@ -440,6 +557,53 @@ PATCH /team/{id}/toggle-status
   }
 }
 ```
+
+## Testing & Development
+
+### Test Data Available
+The API comes with seeded test data for immediate testing:
+
+**Shop Owners:**
+- Email: `john@example.com`, Password: `password` (Tech Store Owner)
+- Email: `jane@example.com`, Password: `password` (Fashion Boutique Owner)
+
+**Sales Persons:**
+- Email: `mike@techstore.com`, Password: `password` (Tech Store)
+- Email: `sarah@fashionboutique.com`, Password: `password` (Fashion Boutique)
+
+### Quick Start Testing
+1. **Register a new user:**
+```bash
+curl -X POST localhost:8002/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com","password":"password123","password_confirmation":"password123"}'
+```
+
+2. **Login with email/password:**
+```bash
+curl -X POST localhost:8002/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123"}'
+```
+
+3. **Use the returned token for authenticated requests:**
+```bash
+curl -X GET localhost:8002/api/auth/user \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
+### Development Tools
+- **Interactive API Documentation**: `/docs` endpoint with live testing
+- **Postman Collection**: Download from the documentation page
+- **OpenAPI Specification**: Auto-generated for integration
+- **Database Seeding**: `php artisan migrate:fresh --seed` for fresh test data
+
+### Multi-Tenant Testing Flow
+1. Register/login as an owner
+2. Create a shop using `POST /shops`
+3. Add team members using `POST /team`
+4. Test data isolation by switching between users
+5. Verify role-based permissions work correctly
 
 ## Rate Limiting
 The API implements rate limiting:
