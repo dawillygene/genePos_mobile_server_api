@@ -14,8 +14,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UserSeeder::class,
-            ProductSeeder::class,
+            ShopSeeder::class, // Creates shops, owners, sales persons, and shop-specific products
+            // Additional seeders can be added here if needed
         ]);
     }
 }

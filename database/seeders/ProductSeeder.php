@@ -3,12 +3,21 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
+use App\Models\Shop;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get the first shop, or create a default one if none exists
+        $shop = Shop::first();
+        
+        if (!$shop) {
+            $this->command->info('No shops found. Please run ShopSeeder first or create a shop.');
+            return;
+        }
+
         $products = [
             [
                 'name' => 'Coca Cola 500ml',
@@ -20,6 +29,7 @@ class ProductSeeder extends Seeder
                 'sku' => 'COKE-500ML',
                 'category' => 'Beverages',
                 'is_active' => true,
+                'shop_id' => $shop->id,
             ],
             [
                 'name' => 'Bread Loaf',
@@ -31,6 +41,7 @@ class ProductSeeder extends Seeder
                 'sku' => 'BREAD-WHITE',
                 'category' => 'Bakery',
                 'is_active' => true,
+                'shop_id' => $shop->id,
             ],
             [
                 'name' => 'Milk 1L',
@@ -42,6 +53,7 @@ class ProductSeeder extends Seeder
                 'sku' => 'MILK-1L',
                 'category' => 'Dairy',
                 'is_active' => true,
+                'shop_id' => $shop->id,
             ],
             [
                 'name' => 'Bananas (per kg)',
@@ -53,6 +65,7 @@ class ProductSeeder extends Seeder
                 'sku' => 'BANANA-KG',
                 'category' => 'Fruits',
                 'is_active' => true,
+                'shop_id' => $shop->id,
             ],
             [
                 'name' => 'Rice 2kg',
@@ -64,11 +77,14 @@ class ProductSeeder extends Seeder
                 'sku' => 'RICE-2KG',
                 'category' => 'Grains',
                 'is_active' => true,
+                'shop_id' => $shop->id,
             ],
         ];
 
         foreach ($products as $product) {
             Product::create($product);
         }
+        
+        $this->command->info('Products seeded successfully for shop: ' . $shop->name);
     }
 }
