@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:gene_pos/constants.dart';
+import 'package:gene_pos/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -508,19 +509,77 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
+    // Validate inputs
+    if (_emailController.text.trim().isEmpty) {
+      _showErrorSnackBar('Please enter your email or username');
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _showErrorSnackBar('Please enter your password');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate login process
-    Future.delayed(Duration(seconds: 2), () {
+    try {
+      final authService = AuthService();
+      final result = await authService.login(
+        emailOrUsername: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
       if (mounted) {
-        Navigator.pushNamed(context, '/dashboard');
         setState(() {
           _isLoading = false;
         });
+
+        if (result['success']) {
+          _showSuccessSnackBar(result['message']);
+          // Navigate to dashboard after successful login
+          Future.delayed(Duration(milliseconds: 1500), () {
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, '/dashboard');
+            }
+          });
+        } else {
+          _showErrorSnackBar(result['message']);
+        }
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        _showErrorSnackBar('Login failed: ${e.toString()}');
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: TextStyle(color: kWhiteColor)),
+        backgroundColor: Colors.red.withOpacity(0.8),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: TextStyle(color: kWhiteColor)),
+        backgroundColor: Colors.green.withOpacity(0.8),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: EdgeInsets.all(16),
+      ),
+    );
   }
 }
