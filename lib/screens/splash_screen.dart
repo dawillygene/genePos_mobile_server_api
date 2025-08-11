@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:gene_pos/constants.dart';
+import 'package:gene_pos/services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -89,11 +90,15 @@ class _SplashScreenState extends State<SplashScreen>
     _textController.forward();
 
     await Future.delayed(Duration(milliseconds: 3000));
-    _navigateToLogin();
+    _navigateToNextScreen();
   }
 
-  void _navigateToLogin() {
-    Navigator.of(context).pushReplacementNamed('/login');
+  void _navigateToNextScreen() {
+    if (AuthService().isAuthenticated) {
+      Navigator.of(context).pushReplacementNamed('/dashboard');
+    } else {
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
   }
 
   @override

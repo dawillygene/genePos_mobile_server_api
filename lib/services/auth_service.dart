@@ -2,6 +2,7 @@ import 'package:gene_pos/models/user_model.dart';
 import 'package:gene_pos/database_helper.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -106,6 +107,10 @@ class AuthService {
 
       _currentUser = user;
 
+      // Save user session
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('userId', user.id!);
+
       return {
         'success': true,
         'message': 'Login successful',
@@ -117,12 +122,27 @@ class AuthService {
   }
 
   // Logout user
-  void logout() {
+  Future<void> logout() async {
     _currentUser = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userId');
   }
 
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
+
+  // Check login status
+  Future<void> checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId');
+
+    if (userId != null) {
+      final user = await getUserById(userId);
+      if (user != null && !user.isSuspended) {
+        _currentUser = user;
+      }
+    }
+  }
 
   // Update user profile
   Future<Map<String, dynamic>> updateProfile({

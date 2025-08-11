@@ -539,8 +539,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _navigateToUnits() {
-    print('Navigate to Units');
-    // TODO: Navigate to units management screen
+    Navigator.pushNamed(context, '/units');
   }
 
   void _navigateToPurchases() {
@@ -583,7 +582,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     // TODO: Navigate to reports screen
   }
 
-  void _handleLogout() {
+  void _handleLogout() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -606,8 +605,8 @@ class _DashboardScreenState extends State<DashboardScreen>
               child: Text('Cancel', style: TextStyle(color: kDarkBlue)),
             ),
             ElevatedButton(
-              onPressed: () {
-                AuthService().logout();
+              onPressed: () async {
+                await AuthService().logout();
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/login',
