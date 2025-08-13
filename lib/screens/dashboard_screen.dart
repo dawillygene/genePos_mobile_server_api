@@ -543,8 +543,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _navigateToPurchases() {
-    print('Navigate to Purchases');
-    // TODO: Navigate to purchases management screen
+    Navigator.pushNamed(context, '/purchases');
   }
 
   void _navigateToSuppliers() {

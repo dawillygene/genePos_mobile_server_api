@@ -8,6 +8,7 @@ import 'package:gene_pos/screens/login_screen.dart';
 import 'package:gene_pos/screens/register_screen.dart';
 import 'package:gene_pos/screens/units_screen.dart';
 import 'package:gene_pos/screens/currencies_screen.dart';
+import 'package:gene_pos/screens/purchases_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => DashboardScreen(),
         '/units': (context) => UnitsScreen(),
         '/currencies': (context) => CurrenciesScreen(),
+        '/purchases': (context) => PurchasesScreen(),
       },
     );
   }

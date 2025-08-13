@@ -46,4 +46,22 @@ class Purchase {
       'updated_at': updatedAt,
     };
   }
+
+  factory Purchase.fromMap(Map<String, dynamic> map) {
+    return Purchase(
+      id: map['id'],
+      supplierId: map['supplier_id'],
+      userId: map['user_id'],
+      subTotal: map['sub_total'],
+      tax: map['tax'],
+      discountValue: map['discount_value'],
+      discountType: map['discount_type'],
+      shipping: map['shipping'],
+      grandTotal: map['grand_total'],
+      status: map['status'],
+      date: map['date'],
+      createdAt: map['created_at'],
+      updatedAt: map['updated_at'],
+    );
+  }
 }
