@@ -568,8 +568,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _navigateToCurrency() {
-    print('Navigate to Currency');
-    // TODO: Navigate to currency settings screen
+    Navigator.pushNamed(context, '/currencies');
   }
 
   void _navigateToSettings() {

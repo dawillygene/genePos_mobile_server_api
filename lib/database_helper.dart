@@ -563,5 +563,14 @@ class DatabaseHelper {
         updated_at TEXT
       )
     ''');
+
+    await db.insert('currencies', {
+      'name': 'Tanzanian Shilling',
+      'code': 'Tsh',
+      'symbol': 'Tsh',
+      'active': 1,
+      'created_at': DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
+    });
   }
 }

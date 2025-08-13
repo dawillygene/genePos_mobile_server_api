@@ -28,4 +28,36 @@ class Category {
       'updated_at': updatedAt,
     };
   }
+
+  factory Category.fromMap(Map<String, dynamic> map) {
+    return Category(
+      id: map['id'],
+      image: map['image'],
+      name: map['name'],
+      description: map['description'],
+      status: map['status'] == 1,
+      createdAt: map['created_at'],
+      updatedAt: map['updated_at'],
+    );
+  }
+
+  Category copyWith({
+    int? id,
+    String? image,
+    String? name,
+    String? description,
+    bool? status,
+    String? createdAt,
+    String? updatedAt,
+  }) {
+    return Category(
+      id: id ?? this.id,
+      image: image ?? this.image,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

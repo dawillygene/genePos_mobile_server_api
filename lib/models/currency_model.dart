@@ -28,4 +28,16 @@ class Currency {
       'updated_at': updatedAt,
     };
   }
+
+  factory Currency.fromMap(Map<String, dynamic> map) {
+    return Currency(
+      id: map['id'],
+      name: map['name'],
+      code: map['code'],
+      symbol: map['symbol'],
+      active: map['active'] == 1,
+      createdAt: map['created_at'],
+      updatedAt: map['updated_at'],
+    );
+  }
 }

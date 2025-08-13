@@ -25,4 +25,33 @@ class Customer {
       'updated_at': updatedAt,
     };
   }
+
+  factory Customer.fromMap(Map<String, dynamic> map) {
+    return Customer(
+      id: map['id'],
+      name: map['name'],
+      phone: map['phone'],
+      address: map['address'],
+      createdAt: map['created_at'],
+      updatedAt: map['updated_at'],
+    );
+  }
+
+  Customer copyWith({
+    int? id,
+    String? name,
+    String? phone,
+    String? address,
+    String? createdAt,
+    String? updatedAt,
+  }) {
+    return Customer(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      address: address ?? this.address,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }
