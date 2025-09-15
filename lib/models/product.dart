@@ -1,4 +1,9 @@
-impor@JsonSerializable()
+import 'package:json_annotation/json_annotation.dart';
+import 'package:equatable/equatable.dart';
+
+part 'product.g.dart';
+
+@JsonSerializable()
 class Product extends Equatable {
   final int id;
   final String name;
@@ -30,39 +35,11 @@ class Product extends Equatable {
     required this.costPrice,
     required this.stockQuantity,
     this.barcode,
-    required this.sku,:json_annotation/json_annotation.dart';
-import 'package:equatable/equatable.dart';
-
-part 'product.g.dart';
-
-@JsonSerializable()
-class Product extends Equatable {
-  final String id;
-  final String name;
-  final String description;
-  final double price;
-  final double costPrice;
-  final int stockQuantity;
-  final String? barcode;
-  final String? sku;
-  final String category;
-  final String? imageUrl;
-  final bool isActive;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
-  const Product({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.costPrice,
-    required this.stockQuantity,
-    this.barcode,
-    this.sku,
+    required this.sku,
     required this.category,
     this.imageUrl,
     this.isActive = true,
+    this.shopId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -72,7 +49,7 @@ class Product extends Equatable {
   Map<String, dynamic> toJson() => _$ProductToJson(this);
 
   Product copyWith({
-    String? id,
+    int? id,
     String? name,
     String? description,
     double? price,
@@ -83,6 +60,7 @@ class Product extends Equatable {
     String? category,
     String? imageUrl,
     bool? isActive,
+    int? shopId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -98,6 +76,7 @@ class Product extends Equatable {
       category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
       isActive: isActive ?? this.isActive,
+      shopId: shopId ?? this.shopId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -116,6 +95,7 @@ class Product extends Equatable {
     category,
     imageUrl,
     isActive,
+    shopId,
     createdAt,
     updatedAt,
   ];
