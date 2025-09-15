@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "160466323811",
+    "firebase_url": "https://genepos-719a5-default-rtdb.firebaseio.com",
+    "project_id": "genepos-719a5",
+    "storage_bucket": "genepos-719a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160466323811:android:0ad73176cb35b0949f2b56",
+        "android_client_info": {
+          "package_name": "com.genelabs.genepos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "160466323811-r9hthq6n7e7jb20d775rf0ql7tq8l784.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.genelabs.genepos",
+            "certificate_hash": "c448eeaf41a177240164f00c0a312783124004d5"
+          }
+        },
+        {
+          "client_id": "160466323811-m7lp74omn660kdbijf6cphdrs1339fdb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJNM29wDQWij4_S0HMrP0r_7bSCioNCP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "160466323811-0n83kiifen7uig64lt2e8k3r0u9tn6gq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "160466323811-gbog597prjr1p1mt0o33vsg208f35fp0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.genelabs.genepos"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
