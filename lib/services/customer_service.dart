@@ -10,7 +10,6 @@ class CustomerService {
   Future<int> createCustomer(Customer customer) async {
     final db = await _dbHelper.database;
     return await db.insert('customers', {
-      'id': customer.id,
       'name': customer.name,
       'phone': customer.phone,
       'email': customer.email,

@@ -5,7 +5,7 @@ part 'customer.g.dart';
 
 @JsonSerializable()
 class Customer extends Equatable {
-  final int id;
+  final int? id;
   final String name;
   final String? phone;
   final String? email;
@@ -23,7 +23,7 @@ class Customer extends Equatable {
   final DateTime updatedAt;
 
   const Customer({
-    required this.id,
+    this.id,
     required this.name,
     this.phone,
     this.email,

@@ -78,16 +78,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     // Welcome message
                     Text(
                       'Welcome back, ${user?.name ?? 'User'}!',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: AppConstants.paddingSmall),
                     Text(
                       'Role: ${_getRoleDisplayName(user?.role)}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                     ),
 
                     const SizedBox(height: AppConstants.paddingLarge),
@@ -127,9 +126,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       children: [
         Text(
           'Sales Overview',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppConstants.paddingMedium),
 
@@ -186,7 +185,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildMetricCard(String title, String value, String subtitle, Color color, IconData icon) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    String subtitle,
+    Color color,
+    IconData icon,
+  ) {
     return Card(
       elevation: 4,
       child: Padding(
@@ -200,9 +205,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 const SizedBox(width: AppConstants.paddingSmall),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -216,9 +221,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -315,38 +320,43 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           children: [
             Text(
               'Recent Transactions',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             TextButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.transactions),
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.transactions),
               child: const Text('View All'),
             ),
           ],
         ),
         const SizedBox(height: AppConstants.paddingMedium),
 
-        ...recentTransactions.take(3).map((transaction) => Card(
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green.shade100,
-              child: const Icon(Icons.receipt, color: Colors.green),
-            ),
-            title: Text('#${transaction['transaction_number']}'),
-            subtitle: Text(
-              '${transaction['timestamp'] ?? ''}',
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-            trailing: Text(
-              '\$${transaction['total']?.toStringAsFixed(2) ?? '0.00'}',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+        ...recentTransactions
+            .take(3)
+            .map(
+              (transaction) => Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.green.shade100,
+                    child: const Icon(Icons.receipt, color: Colors.green),
+                  ),
+                  title: Text('#${transaction['transaction_number']}'),
+                  subtitle: Text(
+                    '${transaction['timestamp'] ?? ''}',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                  trailing: Text(
+                    '\$${transaction['total']?.toStringAsFixed(2) ?? '0.00'}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        )),
       ],
     );
   }
@@ -357,9 +367,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       children: [
         Text(
           'Quick Actions',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppConstants.paddingMedium),
 
@@ -441,9 +451,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               const SizedBox(height: AppConstants.paddingMedium),
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
             ],

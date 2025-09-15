@@ -20,7 +20,8 @@ class POSScreen extends ConsumerStatefulWidget {
 class _POSScreenState extends ConsumerState<POSScreen> {
   final ProductService _productService = ProductService();
   final CustomerService _customerService = CustomerService();
-  final txn_service.TransactionService _transactionService = txn_service.TransactionService();
+  final txn_service.TransactionService _transactionService =
+      txn_service.TransactionService();
 
   List<Product> _products = [];
   List<Product> _filteredProducts = [];
@@ -181,7 +182,8 @@ class _POSScreenState extends ConsumerState<POSScreen> {
         total: _total,
         paymentMethod: _getPaymentMethod(paymentMethod),
         customerId: _selectedCustomer?.id,
-        isCredit: _selectedCustomer != null && _selectedCustomer!.creditLimit > 0,
+        isCredit:
+            _selectedCustomer != null && _selectedCustomer!.creditLimit > 0,
       );
 
       if (mounted) {
@@ -758,15 +760,702 @@ class CategoriesScreen extends StatelessWidget {
   }
 }
 
-class CustomersScreen extends StatelessWidget {
+class CustomersScreen extends ConsumerStatefulWidget {
   const CustomersScreen({super.key});
+
+  @override
+  ConsumerState<CustomersScreen> createState() => _CustomersScreenState();
+}
+
+class _CustomersScreenState extends ConsumerState<CustomersScreen> {
+  final CustomerService _customerService = CustomerService();
+
+  List<Customer> _customers = [];
+  List<Customer> _filteredCustomers = [];
+
+  final TextEditingController _searchController = TextEditingController();
+  bool _isLoading = true;
+  bool _showAddCustomer = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+    _searchController.addListener(_filterCustomers);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final customers = await _customerService.getAllCustomers();
+
+      setState(() {
+        _customers = customers;
+        _filteredCustomers = customers;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading customers: $e')));
+      }
+    }
+  }
+
+  void _filterCustomers() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredCustomers = _customers.where((customer) {
+        return customer.name.toLowerCase().contains(query) ||
+            customer.phone?.toLowerCase().contains(query) == true ||
+            customer.email?.toLowerCase().contains(query) == true;
+      }).toList();
+    });
+  }
+
+  Future<void> _addCustomer(Customer customer) async {
+    try {
+      await _customerService.createCustomer(customer);
+      await _loadData(); // Refresh the list
+      setState(() => _showAddCustomer = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Customer added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error adding customer: $e')));
+      }
+    }
+  }
+
+  Future<void> _updateCustomer(Customer customer) async {
+    try {
+      await _customerService.updateCustomer(customer);
+      await _loadData(); // Refresh the list
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Customer updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating customer: $e')));
+      }
+    }
+  }
+
+  Future<void> _deleteCustomer(int customerId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Customer'),
+        content: const Text('Are you sure you want to delete this customer?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _customerService.deleteCustomer(customerId);
+        await _loadData(); // Refresh the list
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Customer deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error deleting customer: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  void _showCustomerDetails(Customer customer) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => CustomerDetailsSheet(
+        customer: customer,
+        onUpdate: _updateCustomer,
+        onDelete: () => _deleteCustomer(customer.id!),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Customers')),
-      body: const Center(child: Text('Customers Screen - Coming Soon')),
+      appBar: AppBar(
+        title: const Text('Customers'),
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => setState(() => _showAddCustomer = true),
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                // Search Bar
+                Container(
+                  padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                  color: Colors.grey.shade50,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search customers...',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+
+                // Customer Count
+                Container(
+                  padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                  color: Colors.blue.shade50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildStatCard(
+                        'Total Customers',
+                        _customers.length.toString(),
+                        Icons.people,
+                        Colors.blue,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Customer List
+                Expanded(
+                  child: _filteredCustomers.isEmpty
+                      ? const Center(child: Text('No customers found'))
+                      : ListView.builder(
+                          itemCount: _filteredCustomers.length,
+                          itemBuilder: (context, index) {
+                            final customer = _filteredCustomers[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: AppConstants.paddingMedium,
+                                vertical: 4,
+                              ),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.blue.shade100,
+                                  child: Text(
+                                    customer.name.isNotEmpty
+                                        ? customer.name[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                title: Text(
+                                  customer.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(customer.phone ?? 'No phone'),
+                                    if (customer.email != null)
+                                      Text(
+                                        customer.email!,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    if (customer.creditLimit > 0)
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Credit: \$${customer.outstandingBalance.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              color: customer.outstandingBalance >
+                                                      customer.creditLimit * 0.8
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            ' / \$${customer.creditLimit.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                                trailing: PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    switch (value) {
+                                      case 'view':
+                                        _showCustomerDetails(customer);
+                                        break;
+                                      case 'edit':
+                                        // TODO: Implement edit customer
+                                        break;
+                                      case 'delete':
+                                        _deleteCustomer(customer.id!);
+                                        break;
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: 'view',
+                                      child: Text('View Details'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: Text('Edit'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                                onTap: () => _showCustomerDetails(customer),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+
+      // Add Customer FAB
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() => _showAddCustomer = true),
+        child: const Icon(Icons.add),
+      ),
+
+      // Add Customer Bottom Sheet
+      bottomSheet: _showAddCustomer
+          ? AddCustomerSheet(
+              onSave: _addCustomer,
+              onCancel: () => setState(() => _showAddCustomer = false),
+            )
+          : null,
     );
+  }
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          title,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
+class AddCustomerSheet extends StatefulWidget {
+  final Function(Customer) onSave;
+  final VoidCallback onCancel;
+
+  const AddCustomerSheet({
+    super.key,
+    required this.onSave,
+    required this.onCancel,
+  });
+
+  @override
+  State<AddCustomerSheet> createState() => _AddCustomerSheetState();
+}
+
+class _AddCustomerSheetState extends State<AddCustomerSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _creditLimitController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _creditLimitController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final customer = Customer(
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      email: _emailController.text.trim().isEmpty
+          ? null
+          : _emailController.text.trim(),
+      creditLimit: double.tryParse(_creditLimitController.text) ?? 0.0,
+      outstandingBalance: 0.0,
+      isActive: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    widget.onSave(customer);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Add New Customer',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: widget.onCancel,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: AppConstants.paddingMedium),
+
+            // Name Field
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Full Name *',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter customer name';
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: AppConstants.paddingMedium),
+
+            // Phone Field
+            TextFormField(
+              controller: _phoneController,
+              decoration: const InputDecoration(
+                labelText: 'Phone Number *',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter phone number';
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: AppConstants.paddingMedium),
+
+            // Email Field
+            TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email (Optional)',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+
+            const SizedBox(height: AppConstants.paddingMedium),
+
+            // Credit Limit Field
+            TextFormField(
+              controller: _creditLimitController,
+              decoration: const InputDecoration(
+                labelText: 'Credit Limit (Optional)',
+                prefixText: '\$',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+
+            const SizedBox(height: AppConstants.paddingLarge),
+
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: widget.onCancel,
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: AppConstants.paddingMedium),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _save,
+                    child: const Text('Save Customer'),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: AppConstants.paddingMedium),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CustomerDetailsSheet extends StatelessWidget {
+  final Customer customer;
+  final Function(Customer) onUpdate;
+  final VoidCallback onDelete;
+
+  const CustomerDetailsSheet({
+    super.key,
+    required this.customer,
+    required this.onUpdate,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                customer.name,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppConstants.paddingMedium),
+
+          // Customer Info
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoRow('Phone', customer.phone ?? 'Not provided'),
+                  if (customer.email != null)
+                    _buildInfoRow('Email', customer.email!),
+                  _buildInfoRow(
+                    'Status',
+                    customer.isActive ? 'Active' : 'Inactive',
+                  ),
+                  _buildInfoRow(
+                    'Member since',
+                    _formatDate(customer.createdAt),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: AppConstants.paddingMedium),
+
+          // Credit Information
+          if (customer.creditLimit > 0)
+            Card(
+              color: Colors.blue.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Credit Information',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.paddingSmall),
+                    _buildInfoRow(
+                      'Credit Limit',
+                      '\$${customer.creditLimit.toStringAsFixed(2)}',
+                    ),
+                    _buildInfoRow(
+                      'Outstanding Balance',
+                      '\$${customer.outstandingBalance.toStringAsFixed(2)}',
+                    ),
+                    _buildInfoRow(
+                      'Available Credit',
+                      '\$${(customer.creditLimit - customer.outstandingBalance).toStringAsFixed(2)}',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          const SizedBox(height: AppConstants.paddingMedium),
+
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // TODO: Navigate to customer transaction history
+                  },
+                  icon: const Icon(Icons.receipt),
+                  label: const Text('Transaction History'),
+                ),
+              ),
+              const SizedBox(width: AppConstants.paddingSmall),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // TODO: Implement edit customer
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Edit Customer'),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppConstants.paddingSmall),
+
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete, color: Colors.red),
+              label: const Text(
+                'Delete Customer',
+                style: TextStyle(color: Colors.red),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }
 
