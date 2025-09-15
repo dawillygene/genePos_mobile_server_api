@@ -118,9 +118,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                   Text(
                     'Create your account',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
 
@@ -161,8 +161,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value)) {
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
                         return 'Please enter a valid email';
                       }
                       return null;
@@ -272,7 +273,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, AppRoutes.login);
+                          Navigator.pushReplacementNamed(
+                            context,
+                            AppRoutes.login,
+                          );
                         },
                         child: const Text('Login'),
                       ),
