@@ -57,7 +57,8 @@ class StockAdjustment extends Equatable {
     required this.updatedAt,
   });
 
-  factory StockAdjustment.fromJson(Map<String, dynamic> json) => _$StockAdjustmentFromJson(json);
+  factory StockAdjustment.fromJson(Map<String, dynamic> json) =>
+      _$StockAdjustmentFromJson(json);
   Map<String, dynamic> toJson() => _$StockAdjustmentToJson(this);
 
   StockAdjustment copyWith({

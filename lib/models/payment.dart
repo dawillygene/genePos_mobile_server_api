@@ -47,7 +47,8 @@ class Payment extends Equatable {
     required this.updatedAt,
   });
 
-  factory Payment.fromJson(Map<String, dynamic> json) => _$PaymentFromJson(json);
+  factory Payment.fromJson(Map<String, dynamic> json) =>
+      _$PaymentFromJson(json);
   Map<String, dynamic> toJson() => _$PaymentToJson(this);
 
   Payment copyWith({

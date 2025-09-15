@@ -1,13 +1,5 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/user.dart';
-import '../models/category.dart';
-import '../models/product.dart';
-import '../models/customer.dart';
-import '../models/transaction.dart';
-import '../models/transaction_item.dart';
-import '../models/payment.dart';
-import '../models/stock_adjustment.dart';
 
 class DatabaseHelper {
   static const _databaseName = 'gene_pos.db';
@@ -196,13 +188,25 @@ class DatabaseHelper {
     ''');
 
     // Create indexes for better performance
-    await db.execute('CREATE INDEX idx_products_category ON products(category)');
+    await db.execute(
+      'CREATE INDEX idx_products_category ON products(category)',
+    );
     await db.execute('CREATE INDEX idx_products_sku ON products(sku)');
-    await db.execute('CREATE INDEX idx_transactions_user ON transactions(user_id)');
-    await db.execute('CREATE INDEX idx_transactions_customer ON transactions(customer_id)');
-    await db.execute('CREATE INDEX idx_transaction_items_transaction ON transaction_items(transaction_id)');
-    await db.execute('CREATE INDEX idx_payments_customer ON payments(customer_id)');
-    await db.execute('CREATE INDEX idx_stock_adjustments_product ON stock_adjustments(product_id)');
+    await db.execute(
+      'CREATE INDEX idx_transactions_user ON transactions(user_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_transactions_customer ON transactions(customer_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_transaction_items_transaction ON transaction_items(transaction_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_payments_customer ON payments(customer_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_stock_adjustments_product ON stock_adjustments(product_id)',
+    );
   }
 
   Future<void> _seedInitialData(Database db) async {
@@ -210,8 +214,14 @@ class DatabaseHelper {
     final categories = [
       {'name': 'Food & Beverages', 'description': 'Food items and drinks'},
       {'name': 'Household', 'description': 'Household items and supplies'},
-      {'name': 'Personal Care', 'description': 'Personal care and hygiene products'},
-      {'name': 'Electronics', 'description': 'Electronic devices and accessories'},
+      {
+        'name': 'Personal Care',
+        'description': 'Personal care and hygiene products',
+      },
+      {
+        'name': 'Electronics',
+        'description': 'Electronic devices and accessories',
+      },
       {'name': 'Clothing', 'description': 'Clothing and fashion items'},
       {'name': 'Others', 'description': 'Miscellaneous items'},
     ];
@@ -247,7 +257,9 @@ class DatabaseHelper {
 
   Future<Map<String, dynamic>> getDatabaseInfo() async {
     final db = await database;
-    final result = await db.rawQuery('SELECT COUNT(*) as count FROM sqlite_master WHERE type="table"');
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM sqlite_master WHERE type="table"',
+    );
     final tableCount = Sqflite.firstIntValue(result) ?? 0;
 
     return {
