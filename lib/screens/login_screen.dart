@@ -47,6 +47,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _googleSignIn() async {
+    try {
+      await ref.read(authProvider.notifier).googleSignIn();
+
+      if (mounted) {
+        final authState = ref.read(authProvider);
+        if (authState.isAuthenticated) {
+          Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -175,6 +197,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   const SizedBox(height: AppConstants.paddingMedium),
 
+                  // Divider
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade300,
+                          thickness: 1,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppConstants.paddingMedium,
+                        ),
+                        child: Text(
+                          'or',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade300,
+                          thickness: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: AppConstants.paddingMedium),
+
+                  // Google Sign-In Button
+                  OutlinedButton.icon(
+                    onPressed: authState.isLoading ? null : _googleSignIn,
+                    icon: Image.asset(
+                      'assets/images/google_logo.png',
+                      height: 20,
+                      width: 20,
+                    ),
+                    label: const Text('Continue with Google'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
+                      ),
+                    ),
+                  ),
+
                   // Demo Credentials
                   Container(
                     padding: const EdgeInsets.all(AppConstants.paddingMedium),
@@ -203,6 +276,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ],
                     ),
+                  ),
+
+                  const SizedBox(height: AppConstants.paddingMedium),
+
+                  // Register Link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Don\'t have an account? ',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, AppRoutes.register);
+                        },
+                        child: const Text('Create Account'),
+                      ),
+                    ],
                   ),
 
                   // Error Message

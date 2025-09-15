@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
 import '../providers/auth_provider.dart';
+import '../models/user.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -33,14 +34,14 @@ class DashboardScreen extends ConsumerWidget {
           children: [
             // Welcome message
             Text(
-              'Welcome back, ${user?.displayName ?? 'User'}!',
+              'Welcome back, ${user?.name ?? 'User'}!',
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             Text(
-              'Role: ${user?.roleDisplayName ?? 'Unknown'}',
+              'Role: ${_getRoleDisplayName(user?.role)}',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
@@ -83,7 +84,7 @@ class DashboardScreen extends ConsumerWidget {
                     Colors.purple,
                     () => Navigator.pushNamed(context, AppRoutes.transactions),
                   ),
-                  if (user?.isAdmin ?? false) ...[
+                  if (user?.role == UserRole.owner) ...[
                     _buildActionCard(
                       context,
                       'Categories',
@@ -139,5 +140,16 @@ class DashboardScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String _getRoleDisplayName(UserRole? role) {
+    switch (role) {
+      case UserRole.owner:
+        return 'Owner';
+      case UserRole.salesPerson:
+        return 'Sales Person';
+      default:
+        return 'Unknown';
+    }
   }
 }

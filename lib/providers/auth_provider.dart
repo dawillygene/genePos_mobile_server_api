@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user_model.dart';
+import '../models/user.dart';
 import '../constants/app_constants.dart';
+import '../services/google_signin_service.dart';
 
 // Auth state provider
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -43,21 +44,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // For now, create a mock user based on credentials
       final user = User(
         id: 1,
-        username: username,
-        name: username,
         email: '$username@genepos.com',
+        name: username,
         role: username.toLowerCase() == 'admin'
-            ? AppConstants.roleAdmin
-            : AppConstants.roleSales,
+            ? UserRole.owner
+            : UserRole.salesPerson,
         isActive: true,
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
       );
 
       // Save user to storage
       await _saveUserToStorage(user);
 
       state = state.copyWith(user: user, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  // Google Sign-In
+  Future<void> googleSignIn() async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final googleSignInService = GoogleSignInService();
+      final user = await googleSignInService.signIn();
+
+      if (user != null) {
+        // Save user to storage
+        await _saveUserToStorage(user);
+        state = state.copyWith(user: user, isLoading: false);
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Google Sign-In cancelled',
+        );
+      }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -137,13 +159,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
         // For now, create a placeholder user
         final user = User(
           id: 1,
-          username: 'admin',
-          name: 'Admin User',
           email: 'admin@genepos.com',
-          role: AppConstants.roleAdmin,
+          name: 'Admin User',
+          role: UserRole.owner,
           isActive: true,
           createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
         );
 
         state = state.copyWith(user: user);
@@ -159,7 +179,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       // TODO: Convert user to JSON
-      await prefs.setString(AppConstants.userCacheKey, user.username);
+      await prefs.setString(AppConstants.userCacheKey, user.email);
     } catch (e) {
       print('Error saving user to storage: $e');
     }

@@ -5,6 +5,7 @@ import 'constants/app_constants.dart';
 import 'providers/theme_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/placeholder_screens.dart';
 
@@ -30,6 +31,7 @@ class GenePOSApp extends ConsumerWidget {
       routes: {
         AppRoutes.splash: (context) => const SplashScreen(),
         AppRoutes.login: (context) => const LoginScreen(),
+        AppRoutes.register: (context) => const RegisterScreen(),
         AppRoutes.dashboard: (context) => const DashboardScreen(),
         AppRoutes.pos: (context) => const POSScreen(),
         AppRoutes.products: (context) => const ProductsScreen(),
